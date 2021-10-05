@@ -8,7 +8,7 @@ def generate_figures(log):
 
     footer = 'mmc5983 test report'
 
-    f, spec = log.figure(height_ratios=[1], suptitle='mmc5983 data', footer=footer)
+    f, spec = log.figure(height_ratios=[1, 1], suptitle='mmc5983 data', footer=footer)
     plt.subplot(spec[0,:])
     mag.stats().ttable(rl=True)
 
