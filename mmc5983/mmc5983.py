@@ -1,3 +1,4 @@
+import smbus2
 import spidev
 import time
 
@@ -26,6 +27,9 @@ MIN_DELAY_MEASURE = 1.6e-3
 
 MMC5883_ID = 0x0C
 
+# default i2c address
+_address = 0x30
+
 class CompassData:
     def __init__(self, rawdata):
         self.x_raw = int.from_bytes(rawdata[0:2], 'big')
@@ -51,10 +55,16 @@ class CompassData:
 
 class MMC5983:
 
-    def __init__(self, bus=1, cs=1):
-        self._bus = spidev.SpiDev()
-        self._bus.open(bus, cs)
-        self._bus.max_speed_hz = 10000000 # 10MHz
+    def __init__(self, bus=1, cs=1, i2cbus=None):
+        if i2cbus is None: # spi communication
+            self._bus = spidev.SpiDev()
+            self._bus.open(bus, cs)
+            self._bus.max_speed_hz = 10000000 # 10MHz
+        else: # i2c communication
+            self._bus = smbus2.SMBus(i2cbus)
+            self.read = self.readI2C
+            self.write = self.writeI2C
+
         self.reset()
         self._id = self.read_id()
         self.set_BW()
@@ -94,3 +104,10 @@ class MMC5983:
     def write(self, reg, data):
         data.insert(0, reg)
         return self._bus.xfer(data)
+
+    def readI2C(self, reg, nbytes=1):
+        data = self._bus.read_i2c_block_data(_address, reg, nbytes)
+        return data
+
+    def writeI2C(self, reg, data):
+        self._bus.write_i2c_block_data(_address, reg, data)
