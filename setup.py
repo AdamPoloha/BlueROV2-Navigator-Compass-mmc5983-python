@@ -16,5 +16,8 @@ setup(
         ],
     },
     package_data={ "mmc5983": ["mmc5983.meta"]},
-    install_requires=['spidev'],
+    install_requires=[
+        'smbus2',
+        'spidev'
+    ],
 )
