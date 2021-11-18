@@ -15,6 +15,11 @@ def generate_figures(log):
     plt.subplot(spec[1,:])
     mag.pplot(title='mmc5983 data')
 
+    if getattr(log, 'error', False) is not False:
+        f, spec = log.figure(height_ratios=[1], suptitle='mmc5983 errors', footer=footer)
+
+        plt.subplot(spec[0,:])
+        log.error.head(20).ttable(rl=True)
 
 def main():
     from llog import LLogReader
