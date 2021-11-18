@@ -6,11 +6,12 @@ def main():
 
     device = "mmc5983"
     parser = LLogWriter.create_default_parser(__file__, device)
+    parser.add_argument("--bus", type=int, default=None, help="i2c bus")
     args = parser.parse_args()
 
 
     with LLogWriter(args.meta, args.output, console=args.console) as log:
-        mmc = MMC5983()
+        mmc = MMC5983(i2cbus=args.bus)
 
         def data_getter():
             data = mmc.measure()
