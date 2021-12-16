@@ -31,7 +31,7 @@ MMC5883_ID = 0x0C
 _address = 0x30
 
 class CompassData:
-    def __init__(self, rawdata):
+    def __init__(self, rawdata, caldata):
         self.x_raw = int.from_bytes(rawdata[0:2], 'big')
         self.y_raw = int.from_bytes(rawdata[2:4], 'big')
         self.z_raw = int.from_bytes(rawdata[4:6], 'big')
@@ -46,9 +46,13 @@ class CompassData:
         self.z_raw -= 0x20000
 
         # field strength in gauss
-        self.x = self.x_raw/16384
-        self.y = self.y_raw/16384
-        self.z = self.z_raw/16384
+        self.x_norm = self.x_raw/16384
+        self.y_norm = self.y_raw/16384
+        self.z_norm = self.z_raw/16384
+
+        self.x = self.x_norm + caldata[0]
+        self.y = self.y_norm + caldata[1]
+        self.z = self.z_norm + caldata[2]
 
         self.t_raw = rawdata[7]
         self.t = self.t_raw*200.0/256 - 75
@@ -65,15 +69,35 @@ class MMC5983:
             self.read = self.readI2C
             self.write = self.writeI2C
 
+        self.caldata = [0, 0, 0]
         self.reset()
         self._id = self.read_id()
         self.set_BW()
+        self.calibrate()
+
+    def software_reset(self):
+        self.write(REG_CONTROL1, [REG_CONTROL1_SW_RST])
+        time.sleep(0.01)
+
+    def reset(self):
         self.write(REG_CONTROL0, [REG_CONTROL0_RESET])
         time.sleep(MIN_DELAY_SET_RESET)
 
-    def reset(self):
-        self.write(REG_CONTROL1, [REG_CONTROL1_SW_RST])
-        time.sleep(0.01)
+    def set(self):
+        self.write(REG_CONTROL0, [REG_CONTROL0_SET])
+        time.sleep(MIN_DELAY_SET_RESET)
+
+    def calibrate(self):
+        self.set()
+        setdata = self.measure()
+        self.reset()
+        resetdata = self.measure()
+        self.caldata = [
+            (setdata.x - resetdata.x)/2,
+            (setdata.y - resetdata.y)/2,
+            (setdata.y - resetdata.y)/2
+        ]
+
 
     def set_BW(self, BW=(REG_CONTROL1_BW0 | REG_CONTROL1_BW1)):
         self.write(REG_CONTROL1, [BW])
@@ -91,7 +115,7 @@ class MMC5983:
             continue
 
         rawdata = self.read(REG_XOUT_L, 8)
-        return CompassData(rawdata)
+        return CompassData(rawdata, self.caldata)
 
     def read(self, reg, nbytes=1):
         xferdata = [0] * (nbytes+1)
