@@ -70,7 +70,7 @@ class MMC5983:
         if i2cbus is None: # spi communication
             self._bus = spidev.SpiDev()
             self._bus.open(bus, cs)
-            self._bus.max_speed_hz = 4000000 # 10MHz
+            self._bus.max_speed_hz = 10000000 # 10MHz
         else: # i2c communication
             self._bus = smbus2.SMBus(i2cbus)
             self.read = self.readI2C
