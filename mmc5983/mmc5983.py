@@ -79,9 +79,9 @@ class MMC5983:
         self.caldata = [0, 0, 0]
         self.software_reset()
         self._id = self.read_id()
-        self.reset()
         self.config1()
         self.config2()
+        self.calibrate()
 
     def config1(self):
         self.write(REG_CONTROL1, [REG_CONTROL1_CONFIG])
