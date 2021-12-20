@@ -11,7 +11,6 @@ def main():
     parser.add_argument("--cal", type=int, default=None, help="i2c bus")
     args = parser.parse_args()
 
-
     with LLogWriter(args.meta, args.output, console=args.console) as log:
         mmc = MMC5983(i2cbus=args.bus)
         lastcal = time.time()
@@ -26,8 +25,8 @@ def main():
                 if time.time() > lastcal + 1:
                     mmc.calibrate()
                     lastcal = time.time()
-                data = mmc.measure()
-                logdata = f"{data.x_raw} {data.y_raw} {data.z_raw} {data.t_raw} {data.x:.6f} {data.y:.6f} {data.z:.6f} {data.t:.3f}"
+                data = mmc.read_data()
+                logdata = f"{data.x_raw} {data.y_raw} {data.z_raw} {data.t_raw} {data.x:.6f} {data.y:.6f} {data.z:.6f} {data.t:.3f} {mmc.caldata[0]} {mmc.caldata[1]} {mmc.caldata[2]}"
                 log.log_data(logdata)
             except Exception as e:
                 log.log_error(f'"{e}"')
