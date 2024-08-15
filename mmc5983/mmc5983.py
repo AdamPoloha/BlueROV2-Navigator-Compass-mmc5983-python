@@ -39,23 +39,31 @@ _address = 0x30
 
 class CompassData:
     def __init__(self, rawdata, caldata):
-        self.x_raw = int.from_bytes(rawdata[0:2], 'big')
-        self.y_raw = int.from_bytes(rawdata[2:4], 'big')
-        self.z_raw = int.from_bytes(rawdata[4:6], 'big')
+        self.x_raw = (rawdata[0] * 256) + rawdata[1]
+        self.y_raw = (rawdata[2] * 256) + rawdata[3]
+        self.z_raw = (rawdata[4] * 256) + rawdata[5]
+        #self.x_raw = int.from_bytes(rawdata[0:2], 'big')
+        #self.y_raw = int.from_bytes(rawdata[2:4], 'big')
+        #self.z_raw = int.from_bytes(rawdata[4:6], 'big')
+        #print(self.x_raw, self.y_raw, self.z_raw)
 
         xyz2 = rawdata[6]
         self.x_raw = (self.x_raw << 2) | (((xyz2 & 0xC0) >> 6) & 0x3)
         self.y_raw = (self.y_raw << 2) | (((xyz2 & 0x30) >> 4) & 0x3)
         self.z_raw = (self.z_raw << 2) | (((xyz2 & 0x03) >> 2) & 0x3)
+        #print(self.x_raw, self.y_raw, self.z_raw)
 
         self.x_raw -= 0x20000
         self.y_raw -= 0x20000
         self.z_raw -= 0x20000
+        #print(self.x_raw, self.y_raw, self.z_raw)
 
+        # note: in python2 manually turn into float
         # field strength in gauss
-        self.x_norm = self.x_raw/16384
-        self.y_norm = self.y_raw/16384
-        self.z_norm = self.z_raw/16384
+        self.x_norm = float(self.x_raw)/16384.0
+        self.y_norm = float(self.y_raw)/16384.0
+        self.z_norm = float(self.z_raw)/16384.0
+        #print(self.x_norm, self.y_norm, self.z_norm)
 
         self.x = self.x_norm - caldata[0]
         self.y = self.y_norm - caldata[1]
@@ -157,3 +165,6 @@ class MMC5983:
 
     def writeI2C(self, reg, data):
         self._bus.write_i2c_block_data(_address, reg, data)
+
+    def close(self):
+        self._bus.close()
