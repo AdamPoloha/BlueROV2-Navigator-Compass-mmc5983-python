@@ -13,8 +13,8 @@ This fork adds python 2 compatibility and a new close() method. test.py is modif
 + calibrate() - get data after set(), get data after reset(), calculate mean
 + set_BW(BW=(REG_CONTROL1_BW0 | REG_CONTROL1_BW1)) - set BW0 or BW1 bits to set bandwidth
 + read_id() - read device id register
-+ measure() - run read_data() - **no real use**
-+ read_data() - get 8 bytes of data and use CompassData for calculation - **can put CompassData into measure() to make read_data() more generic and give measure() a purpose**
++ measure() - write TMM bit to REG_CONTROL0 (take magnetic measurement) and wait for staus flag, then run read_data()
++ read_data() - get 8 bytes of data and use CompassData for calculation
 + read(reg, nbytes=1) - read a number of bytes from the select register and successive registers
 + readByte(reg) - run read() with nbytes=0to get single byte
 + write(reg, data) - write data to select register
