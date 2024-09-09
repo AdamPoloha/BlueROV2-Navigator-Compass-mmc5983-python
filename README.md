@@ -18,8 +18,10 @@ This fork adds python 2 compatibility and a new close() method. test.py is modif
 + read(reg, nbytes=1) - read a number of bytes from the select register and successive registers
 + readByte(reg) - run read() with nbytes=0to get single byte
 + write(reg, data) - write data to select register
-+ readI2C(reg, nbytes=1) - launched from \_\_init\_\_() if using i2c bus - **todo check if i2c can be used and if library runs correctly, otherwise can be removed**
++ readI2C(reg, nbytes=1) - launched from \_\_init\_\_() if using i2c bus - **i2c cannot be used on the selected pins, can be removed**
 + writeI2C(reg, data) - **same case as readI2C()**
 + close() - close MMC port
 
-If you only need the Magnetic North direction then units can be ignored, but according to the library file they should be in gauss.
+If only the Magnetic North direction is needed then units can be ignored, but according to the library file they should be in gauss.
+
+The library has an i2c option, but according to the [navigator schematic](https://bluerobotics.com/wp-content/uploads/2022/06/NAVIGATOR-PCB-SCHEMATIC.pdf), the pins used on the Raspberry Pi are for SPI1, SPI6, and GPIO. Therefore, there was no reason to attempt the option's use. The chip seems to have all i2c pins connected and so using it should be possible with jumper wires, but not with the navigator as a HAT.
